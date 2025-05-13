@@ -1,0 +1,19 @@
+{
+    "greeting": "Hi there! Ready to chat with you!",
+    "goodbye_keywords": [
+        "bye",
+        "再见",
+        "goodbye"
+    ],
+    "silence_timeout": 180,
+    "scheduled_greetings": [
+        {
+            "time": "09:00",
+            "text": "Good morning! Would you like to hear the weather forecast?"
+        },
+        {
+            "time": "20:00",
+            "text": "Good evening! Do you want to hear a story or play a game?"
+        }
+    ]
+}

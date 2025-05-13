@@ -105,15 +105,6 @@
             "addon": "message_collector",
             "extension_group": "transcriber",
             "property": {}
-          },
-          {
-            "type": "extension",
-            "name": "weatherapi_tool_python",
-            "addon": "weatherapi_tool_python",
-            "extension_group": "default",
-            "property": {
-              "api_key": "${env:WEATHERAPI_API_KEY|}"
-            }
           }
         ],
         "connections": [
@@ -191,14 +182,6 @@
                     "extension": "tts"
                   }
                 ]
-              },
-              {
-                "name": "tool_call",
-                "dest": [
-                  {
-                    "extension": "weatherapi_tool_python"
-                  }
-                ]
               }
             ],
             "data": [
@@ -210,6 +193,9 @@
                   },
                   {
                     "extension": "message_collector"
+                  },
+                  {
+                    "extension": "conversation_driver_python"
                   }
                 ]
               },
@@ -274,19 +260,6 @@
             "data": [
               {
                 "name": "text_data",
-                "dest": [
-                  {
-                    "extension": "llm"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "extension": "weatherapi_tool_python",
-            "cmd": [
-              {
-                "name": "tool_register",
                 "dest": [
                   {
                     "extension": "llm"

@@ -6,16 +6,15 @@ from websocket import WebSocketConnectionClosedException
 from ten.async_ten_env import AsyncTenEnv
 from ten_ai_base.config import BaseConfig
 import dashscope
-from dashscope.audio.tts_v2 import (
-    SpeechSynthesizer,
-    AudioFormat,
-    ResultCallback,
-)
+from dashscope.audio.tts_v2 import SpeechSynthesizer, AudioFormat, ResultCallback
 
+import aiohttp
 
 @dataclass
 class CosyTTSConfig(BaseConfig):
     api_key: str = ""
+#    ws_url: str = "ws://localhost:50001"
+    base_url: str = ""
     voice: str = "longxiaochun"
     model: str = "cosyvoice-v1"
     sample_rate: int = 16000
@@ -62,7 +61,8 @@ class CosyTTS:
         self.config = config
         self.synthesizer = None  # Initially no synthesizer
         self.queue = asyncio.Queue()
-        dashscope.api_key = config.api_key
+        if not config.base_url:
+            dashscope.api_key = config.api_key
 
     def _create_synthesizer(
         self, ten_env: AsyncTenEnv, callback: AsyncIteratorCallback
@@ -84,6 +84,12 @@ class CosyTTS:
     def text_to_speech_stream(
         self, ten_env: AsyncTenEnv, text: str, end_of_segment: bool
     ) -> None:
+        if self.config.base_url:
+            asyncio.create_task(self._text_to_speech_rest(ten_env, text, end_of_segment))
+        else:
+            self._text_to_speech_dashscope(ten_env, text, end_of_segment)
+
+    def _text_to_speech_dashscope(self, ten_env: AsyncTenEnv, text: str, end_of_segment: bool) -> None:
         try:
             callback = AsyncIteratorCallback(ten_env, self.queue)
 
@@ -102,6 +108,26 @@ class CosyTTS:
         except Exception as e:
             ten_env.log_error(f"Error streaming text, {e}")
             self.synthesizer = None
+
+    async def _text_to_speech_rest(self, ten_env: AsyncTenEnv, text: str, end_of_segment: bool):
+        try:
+            url = self.config.base_url.rstrip("/")
+            payload = {"tts_text": text, "spk_id": self.config.voice}
+            #ten_env.log_info(f"Calling REST TTS: {url} [{json.dumps(payload)}]")
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, data=payload) as resp:
+                    if resp.status != 200:
+                        detail = await resp.text()
+                        ten_env.log_error(f"REST TTS failed, status: {resp.status}, detail: {detail}")
+                        return
+
+                    async for chunk in resp.content.iter_chunked(2048):
+                        if chunk:
+                            await self.queue.put(chunk)
+        except Exception as e:
+            ten_env.log_error(f"REST TTS error: {e}")
+
 
     def cancel(self, ten_env: AsyncTenEnv) -> None:
         if self.synthesizer:

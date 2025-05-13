@@ -1,0 +1,107 @@
+{
+  "type": "extension",
+  "name": "conversation_driver_python",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "type": "system",
+      "name": "ten_runtime_python",
+      "version": "0.8.0"
+    }
+  ],
+  "package": {
+    "include": [
+      "manifest.json",
+      "property.json",
+      "**.py",
+      "README.md",
+      "tests/**"
+    ]
+  },
+  "api": {
+    "property": {
+      "greeting": {
+        "type": "string"
+      },
+      "silence_timeout": {
+        "type": "int64"
+      },
+      "goodbye_keywords": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "scheduled_greetings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "time": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "time",
+            "text"
+          ]
+        }
+      }
+    },
+    "data_in": [
+      {
+        "name": "text_data",
+        "property": {
+          "text": {
+            "type": "string"
+          },
+          "is_final": {
+            "type": "bool"
+          }
+        }
+      },
+      {
+        "name": "llm_output",
+        "property": {
+          "text": {
+            "type": "string"
+          },
+          "is_final": {
+            "type": "bool"
+          }
+        }
+      }
+    ],
+    "data_out": [
+      {
+        "name": "text_data",
+        "property": {
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "cmd_in": [
+      {
+        "name": "on_user_joined",
+        "property": {
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "name": "on_user_left",
+        "property": {
+          "user_id": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  }
+}
