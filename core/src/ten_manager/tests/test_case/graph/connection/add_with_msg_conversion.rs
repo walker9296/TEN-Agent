@@ -166,6 +166,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with fixed value.
@@ -290,6 +291,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with fixed value.
@@ -354,6 +356,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with fixed value.
@@ -388,7 +391,7 @@ mod tests {
             &pkgs_cache,
             Some(msg_conversion),
         );
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         assert!(result.is_ok());
     }
@@ -419,6 +422,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with fixed value.
@@ -481,6 +485,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with from_original mode.
@@ -514,7 +519,7 @@ mod tests {
             Some(msg_conversion),
         );
 
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         assert!(result.is_ok());
         assert!(graph.connections.is_some());
@@ -569,6 +574,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create a message conversion with both message and result conversion.
@@ -612,7 +618,7 @@ mod tests {
             &pkgs_cache,
             Some(msg_conversion),
         );
-        eprintln!("result: {:?}", result);
+        eprintln!("result: {result:?}");
 
         assert!(result.is_ok());
 
@@ -672,6 +678,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         // Create an invalid message conversion with empty rules.
@@ -742,6 +749,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         let msg_conversion = MsgAndResultConversion {
@@ -785,7 +793,7 @@ mod tests {
             Some(msg_conversion),
         );
 
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         // Should fail validation due to empty rules.
         assert!(result.is_err());
@@ -827,6 +835,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         let msg_conversion = MsgAndResultConversion {
@@ -870,7 +879,7 @@ mod tests {
             Some(msg_conversion),
         );
 
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         assert!(result.is_ok());
     }
@@ -911,6 +920,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         let msg_conversion = MsgAndResultConversion {
@@ -954,7 +964,7 @@ mod tests {
             Some(msg_conversion),
         );
 
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         assert!(result.is_err());
     }
@@ -996,6 +1006,7 @@ mod tests {
                 ),
             ],
             connections: None,
+            exposed_messages: None,
         };
 
         let msg_conversion = MsgAndResultConversion {
@@ -1028,7 +1039,7 @@ mod tests {
             Some(msg_conversion),
         );
 
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
 
         assert!(result.is_err());
     }

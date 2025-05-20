@@ -6,6 +6,7 @@
 //
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { z } from "zod";
 
 import {
   EWidgetCategory,
@@ -14,13 +15,14 @@ import {
   type IWidget,
 } from "@/types/widgets";
 import { getZodDefaults } from "@/utils";
-import { PREFERENCES_SCHEMA_LOG } from "@/types/apps";
+import { PREFERENCES_SCHEMA_LOG, LogLineInfoSchema } from "@/types/apps";
 import { dispatchBringToFront } from "@/utils/events";
 
 export const useWidgetStore = create<{
   widgets: IWidget[];
   appendWidget: (widget: IWidget) => void;
-  appendWidgetIfNotExists: (widget: IWidget) => void;
+  /** @deprecated */
+  appendWidgetIfNotExists?: (widget: IWidget) => void;
   removeWidget: (widgetId: string) => void;
   removeWidgets: (widgetIds: string[]) => void;
   updateWidgetDisplayType: (
@@ -42,20 +44,21 @@ export const useWidgetStore = create<{
   // backstage(ws) ---
   backstageWidgets: IWidget[];
   appendBackstageWidget: (widget: IWidget) => void;
-  appendBackstageWidgetIfNotExists: (widget: IWidget) => void;
+  /** @deprecated */
+  appendBackstageWidgetIfNotExists?: (widget: IWidget) => void;
   removeBackstageWidget: (widgetId: string) => void;
   removeBackstageWidgets: (widgetIds: string[]) => void;
 
   // log viewer ---
   logViewerHistory: {
     [id: string]: {
-      history: string[];
+      history: z.infer<typeof LogLineInfoSchema>[];
       maxLength: number;
     };
   };
   appendLogViewerHistory: (
     id: string,
-    history: string[],
+    history: z.infer<typeof LogLineInfoSchema>[],
     options?: { override?: boolean; maxLength?: number }
   ) => void;
   removeLogViewerHistory: (id: string) => void;
@@ -79,9 +82,7 @@ export const useWidgetStore = create<{
 }>()(
   devtools((set) => ({
     widgets: [],
-    appendWidget: (widget: IWidget) =>
-      set((state) => ({ widgets: [...state.widgets, widget] })),
-    appendWidgetIfNotExists: (widget: IWidget) => {
+    appendWidget: (widget: IWidget) => {
       set((state) => ({
         widgets: state.widgets.find(
           (w) =>
@@ -158,10 +159,6 @@ export const useWidgetStore = create<{
     backstageWidgets: [],
     appendBackstageWidget: (widget: IWidget) =>
       set((state) => ({
-        backstageWidgets: [...state.backstageWidgets, widget],
-      })),
-    appendBackstageWidgetIfNotExists: (widget: IWidget) =>
-      set((state) => ({
         backstageWidgets: state.backstageWidgets.find(
           (w) => w.widget_id === widget.widget_id
         )
@@ -185,7 +182,7 @@ export const useWidgetStore = create<{
     logViewerHistory: {},
     appendLogViewerHistory: (
       id: string,
-      history: string[],
+      history: z.infer<typeof LogLineInfoSchema>[],
       options?: { override?: boolean; maxLength?: number }
     ) =>
       set((state) => ({
@@ -242,14 +239,17 @@ export const useWidgetStore = create<{
 
 const logBuffer: {
   [id: string]: {
-    history: string[];
+    history: z.infer<typeof LogLineInfoSchema>[];
   };
 } = {};
 let timer: null | NodeJS.Timeout = null;
 
 // debounced function to append logs
 // to the logViewerHistory in the store
-export const appendLogsById = (id: string, logs: string[]) => {
+export const appendLogsById = (
+  id: string,
+  logs: z.infer<typeof LogLineInfoSchema>[]
+) => {
   if (!logBuffer[id]) {
     logBuffer[id] = { history: logs };
   } else {

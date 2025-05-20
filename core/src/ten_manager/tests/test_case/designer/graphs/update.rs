@@ -153,6 +153,7 @@ mod tests {
                 })
                 .collect(),
             connections: connections.clone(),
+            exposed_messages: vec![],
         };
 
         // Make the request.
@@ -162,14 +163,14 @@ mod tests {
             .to_request();
         let resp = test::call_service(&app, req).await;
 
-        println!("resp: {:?}", resp);
+        println!("resp: {resp:?}");
 
         // Assert that the response is successful.
         // assert!(resp.status().is_success());
 
         let body = test::read_body(resp).await;
         let body_str = std::str::from_utf8(&body).unwrap();
-        println!("Response body: {}", body_str);
+        println!("Response body: {body_str}");
 
         // Define expected property.json content after adding the connection.
         let expected_property_json_str = include_str!(
@@ -228,6 +229,7 @@ mod tests {
             graph_id: nonexistent_graph_id,
             nodes: vec![],
             connections: vec![],
+            exposed_messages: vec![],
         };
 
         // Make the request.
@@ -350,6 +352,7 @@ mod tests {
                 })
                 .collect(),
             connections,
+            exposed_messages: vec![],
         };
 
         // Make the request.
@@ -359,14 +362,14 @@ mod tests {
             .to_request();
         let resp = test::call_service(&app, req).await;
 
-        println!("resp: {:?}", resp);
+        println!("resp: {resp:?}");
 
         // Assert that the response is successful.
         assert!(resp.status().is_success());
 
         let body = test::read_body(resp).await;
         let body_str = std::str::from_utf8(&body).unwrap();
-        println!("Response body: {}", body_str);
+        println!("Response body: {body_str}");
 
         // Define expected property.json content after adding the connection.
         let expected_property_json_str = include_str!(
