@@ -9,11 +9,13 @@ pub mod connection;
 pub mod graph_info;
 pub mod msg_conversion;
 pub mod node;
+pub mod subgraph;
 
 use std::collections::HashMap;
 use std::str::FromStr;
 
 use anyhow::Result;
+use node::GraphNode;
 use serde::{Deserialize, Serialize};
 
 use crate::base_dir_pkg_info::PkgsInfoInApp;
@@ -22,7 +24,7 @@ use crate::constants::{
 };
 use crate::pkg_info::localhost;
 
-use self::connection::GraphConnection;
+use self::connection::{GraphConnection, GraphMessageFlow};
 use self::node::GraphNodeType;
 
 /// The state of the 'app' field declaration in all nodes in the graph.
@@ -135,7 +137,8 @@ pub struct GraphExposedMessage {
 
     /// The name of the extension.
     /// Must match the regular expression ^[A-Za-z_][A-Za-z0-9_]*$
-    pub extension: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension: Option<String>,
 }
 
 /// Represents a property that is exposed by the graph to the outside.
@@ -144,7 +147,8 @@ pub struct GraphExposedMessage {
 pub struct GraphExposedProperty {
     /// The name of the extension.
     /// Must match the regular expression ^[A-Za-z_][A-Za-z0-9_]*$
-    pub extension: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension: Option<String>,
 
     /// The name of the property.
     /// Must match the regular expression ^[A-Za-z_][A-Za-z0-9_]*$
@@ -159,10 +163,10 @@ pub struct GraphExposedProperty {
 /// other.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Graph {
-    pub nodes: Vec<node::GraphNode>,
+    pub nodes: Vec<GraphNode>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub connections: Option<Vec<connection::GraphConnection>>,
+    pub connections: Option<Vec<GraphConnection>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub exposed_messages: Option<Vec<GraphExposedMessage>>,
@@ -284,16 +288,18 @@ impl Graph {
         if let Some(exposed_properties) = &self.exposed_properties {
             for (idx, property) in exposed_properties.iter().enumerate() {
                 // Verify that the extension exists in the graph
-                if !self
-                    .nodes
-                    .iter()
-                    .any(|node| node.name == property.extension)
-                {
+                if !self.nodes.iter().any(|node| {
+                    if let Some(ext) = &property.extension {
+                        &node.name == ext
+                    } else {
+                        false
+                    }
+                }) {
                     return Err(anyhow::anyhow!(
                         "exposed_properties[{}]: extension '{}' does not \
                          exist in the graph",
                         idx,
-                        property.extension
+                        property.extension.as_ref().unwrap_or(&String::new())
                     ));
                 }
             }
